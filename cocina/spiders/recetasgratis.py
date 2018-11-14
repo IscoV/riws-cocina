@@ -58,8 +58,8 @@ class RecetasgratisSpider(CrawlSpider):
             steps=self.__process_steps(response.xpath('//div[@class="apartado"]/p')),
             tags=self.__process_tags(response.xpath('string(//div[@class="properties inline"])').extract()),
             meal_type=clear_spaces(first_or_none(response.xpath('//span[@class="property para"]/text()').extract())),
-            difficulty=clear_spaces(
-                first_or_none(response.xpath('//span[@class="property dificultad"]/text()').extract())),
+            difficulty=self.__process_difficulty(clear_spaces(
+                first_or_none(response.xpath('//span[@class="property dificultad"]/text()').extract()))),
             time=self.__process_time(
                 clear_spaces(first_or_none(response.xpath('//span[@class="property duracion"]/text()').extract()))),
             dinners=self.__process_dinners(clear_spaces(
@@ -104,3 +104,14 @@ class RecetasgratisSpider(CrawlSpider):
             hour, minute = time.split()[0], time.split()[1]
             return int(hour.replace('h', '')) * 60 + int(minute.replace('m', ''))
         return int(time.replace('m', ''))
+
+    @staticmethod
+    def __process_difficulty(param):
+        if 'baja' in param:
+            return 1
+        elif 'media' in param:
+            return 2
+        elif 'alta' in param:
+            return 3
+        else:
+            return 0
