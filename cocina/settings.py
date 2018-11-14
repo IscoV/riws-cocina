@@ -14,6 +14,9 @@ BOT_NAME = 'cocina'
 SPIDER_MODULES = ['cocina.spiders']
 NEWSPIDER_MODULE = 'cocina.spiders'
 
+FEED_FORMAT = 'json'
+FEED_EXPORT_ENCODING = 'utf-8'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'cocina (+http://www.yourdomain.com)'

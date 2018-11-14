@@ -1,14 +1,6 @@
-from bs4 import BeautifulSoup
+def first_or_none(el):
+    return el[0] if el and len(el) > 0 else None
 
 
-def clean_html(raw_html):
-    soup = BeautifulSoup(raw_html)
-    tag_list = soup.find_all(lambda tag: len(tag.attrs) > 0)
-    for t in tag_list:
-        for attr, val in t.attrs:
-            del t[attr]
-    return soup.get_text()
-
-
-def clean_whitespaces(text):
-    return ' '.join(text.split())
+def clear_spaces(text):
+    return " ".join(text.split()) if text else None

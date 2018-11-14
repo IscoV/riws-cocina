@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from bs4 import BeautifulSoup, NavigableString
-from scrapy import Selector
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 
 from cocina.items import CocinaItem
-from cocina.utils import clean_html
+from cocina.utils import clear_spaces, first_or_none
 
 
 class RecetasgratisSpider(CrawlSpider):
@@ -44,34 +42,42 @@ class RecetasgratisSpider(CrawlSpider):
 
     def parse_item(self, response):
         yield CocinaItem(
-            name=response.xpath('//h1[@class="titulo titulo--articulo"]/text()').extract(),
+            name=clear_spaces(first_or_none(response.xpath('//h1[@class="titulo titulo--articulo"]/text()').extract())),
             url=response.url,
             scrappy=self.name,
-            description=self.__process_description(response.xpath('//div[@class="intro"]/p/text()').extract()),
+            description=clear_spaces(first_or_none(response.xpath('string(//div[@class="intro"]/p)').extract())),
             categories=self.__process_breadcrumb(
                 response.xpath('//div[@class="header-gap"]/ul[@class="breadcrumb"]/li/a/span/text()').extract(),
                 response.xpath('//div[@class="header-gap"]/ul[@class="breadcrumb"]/li[last()]/text()').extract()),
-            ingredients=self.__process_ingredients(response.xpath('//li[@class="ingrediente"]/label/text()').extract()),
-            steps=None,
-            tags=None,
-            meal_type=response.xpath('//span[@class="property para"]/text()').extract(),
-            difficulty=response.xpath('//span[@class="property dificultad"]/text()').extract(),
-            time=response.xpath('//span[@class="property duracion"]/text()').extract(),
-            dinners=response.xpath('//span[@class="property comensales"]/text()').extract(),
-            last_updated=response.xpath('//span[@class="date_publish"]/text()').extract(),
+            ingredients=self.__process_ingredients(response.xpath('//li[@class="ingrediente"]')),
+            steps=self.__process_steps(response.xpath('//div[@class="apartado"]/p')),
+            tags=self.__process_tags(response.xpath('string(//div[@class="properties inline"])').extract()),
+            meal_type=clear_spaces(first_or_none(response.xpath('//span[@class="property para"]/text()').extract())),
+            difficulty=clear_spaces(
+                first_or_none(response.xpath('//span[@class="property dificultad"]/text()').extract())),
+            time=clear_spaces(first_or_none(response.xpath('//span[@class="property duracion"]/text()').extract())),
+            dinners=clear_spaces(
+                first_or_none(response.xpath('//span[@class="property comensales"]/text()').extract())),
+            last_updated=clear_spaces(first_or_none(response.xpath('//span[@class="date_publish"]/text()').extract())),
+            language='es',
         )
 
     @staticmethod
     def __process_description(msg):
-        return clean_html(' '.join(e for e in msg))
+        return clear_spaces(msg)
 
     @staticmethod
     def __process_breadcrumb(bread, last):
-        return bread + last
+        return [clear_spaces(e) for e in bread + last]
+
+    @staticmethod
+    def __process_tags(tags):
+        return [clear_spaces(e) for e in tags[0].replace('\nCaracter\u00edsticas adicionales:\n', '').split(',')]
 
     @staticmethod
     def __process_ingredients(ingredients):
-        return [clean_html(i) for i in ingredients]
+        return [clear_spaces(el.xpath('string()').extract()[0]) for el in ingredients]
 
-
-
+    @staticmethod
+    def __process_steps(steps):
+        return [clear_spaces(el.xpath('string()').extract()[0]) for el in steps]

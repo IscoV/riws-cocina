@@ -22,4 +22,4 @@ class CocinaItem(scrapy.Item):
     dinners = scrapy.Field()
     tags = scrapy.Field()
     last_updated = scrapy.Field(serializer=str)
-
+    language = scrapy.Field()
