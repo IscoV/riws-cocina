@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+from datetime import date
+
 import scrapy
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 
 from cocina.items import CocinaItem
 from cocina.utils import clear_spaces, first_or_none
+
+MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre',
+          'noviembre', 'diciembre']
 
 
 class RecetasgratisSpider(CrawlSpider):
@@ -55,10 +60,12 @@ class RecetasgratisSpider(CrawlSpider):
             meal_type=clear_spaces(first_or_none(response.xpath('//span[@class="property para"]/text()').extract())),
             difficulty=clear_spaces(
                 first_or_none(response.xpath('//span[@class="property dificultad"]/text()').extract())),
-            time=clear_spaces(first_or_none(response.xpath('//span[@class="property duracion"]/text()').extract())),
-            dinners=clear_spaces(
-                first_or_none(response.xpath('//span[@class="property comensales"]/text()').extract())),
-            last_updated=clear_spaces(first_or_none(response.xpath('//span[@class="date_publish"]/text()').extract())),
+            time=self.__process_time(
+                clear_spaces(first_or_none(response.xpath('//span[@class="property duracion"]/text()').extract()))),
+            dinners=self.__process_dinners(clear_spaces(
+                first_or_none(response.xpath('//span[@class="property comensales"]/text()').extract()))),
+            last_updated=self.__process_update(
+                clear_spaces(first_or_none(response.xpath('//span[@class="date_publish"]/text()').extract()))),
             language='es',
         )
 
@@ -81,3 +88,19 @@ class RecetasgratisSpider(CrawlSpider):
     @staticmethod
     def __process_steps(steps):
         return [clear_spaces(el.xpath('string()').extract()[0]) for el in steps]
+
+    @staticmethod
+    def __process_dinners(dinners):
+        return int(dinners.replace(' comensales', ''))
+
+    @staticmethod
+    def __process_update(d):
+        d = d.replace('Actualizado: ', '').split()
+        return date(year=int(d[2]), month=MONTHS.index(d[1]) + 1, day=int(d[0]))
+
+    @staticmethod
+    def __process_time(time):
+        if 'h' in time:
+            hour, minute = time.split()[0], time.split()[1]
+            return int(hour.replace('h', '')) * 60 + int(minute.replace('m', ''))
+        return int(time.replace('m', ''))
