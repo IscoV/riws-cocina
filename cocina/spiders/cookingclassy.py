@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import date
+
 import scrapy
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -61,15 +63,18 @@ class CookingclassySpider(CrawlSpider):
             description=clear_spaces(first_or_none(response.xpath('string(//div[@class="content"]/p)').extract())),
             categories=self.__process_category(
                 first_or_none(response.xpath('string(//div[@class="catstags"])').extract())),
-            ingredients=None,
-            steps=None,
+            ingredients=self.__process_ingredients(response.xpath('//li[@class="wprm-recipe-ingredient"]')),
+            steps=self.__process_steps(response.xpath('//div[@class="wprm-recipe-instruction-text"]')),
             tags=self.__process_tags(
                 first_or_none(response.xpath('string(//div[@class="catstags"])').extract())),
-            meal_type=None,
+            meal_type=first_or_none(response.xpath('//p[@id="breadcrumbs"]/span/span/span/a/text()').extract()),
             difficulty=None,
-            time=None,
-            dinners=None,
-            last_updated=None,
+            time=self.__process_time((first_or_none(response.xpath(
+                'string(//div[@class="wprm-recipe-total-time-container"])').extract()))),
+            dinners=self.__process_dinners((first_or_none(response.xpath(
+                'string(//span[@class="wprm-recipe-details wprm-recipe-servings"])').extract()))),
+            last_updated=self.__process_update(
+                clear_spaces(first_or_none(response.xpath('//div[@class="date"]/text()').extract()))),
             language='en',
         )
 
@@ -87,3 +92,36 @@ class CookingclassySpider(CrawlSpider):
         if not tags:
             return None
         return [clear_spaces(e) for e in tags.split(',')]
+
+    @staticmethod
+    def __process_ingredients(ingredients):
+        return [clear_spaces(el.xpath('string()').extract()[0]) for el in ingredients]
+
+    @staticmethod
+    def __process_steps(steps):
+        return [clear_spaces(el.xpath('string()').extract()[0]) for el in steps]
+
+    @staticmethod
+    def __process_time(time):
+        if time:
+            time = time.replace('Total Time:', '')
+        if 'hour' in time and 'minute' in time:
+            time = time.replace('hours', '').replace('hour', '').replace('minutes', '').replace('minute', '')
+            hour, minute = time.split()[0], time.split()[1]
+            return int(hour) * 60 + int(minute)
+        if 'hour' in time:
+            hour = time.replace('hours', '').replace('hour', '')
+            return int(hour) * 60
+        if 'minute' in time:
+            minute = time.replace('minutes', '').replace('minute', '')
+            return int(minute.replace('minutes', ''))
+        return None
+
+    @staticmethod
+    def __process_dinners(servings):
+        return int(servings) if servings else None
+
+    @staticmethod
+    def __process_update(d):
+        d = d.split('.')
+        return date(year=int(d[2]), month=int(d[0]), day=int(d[1]))
