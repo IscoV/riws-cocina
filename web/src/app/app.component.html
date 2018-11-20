@@ -1,0 +1,84 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card card-sm">
+                <div class="card-body row no-gutters align-items-center">
+                    <div class="col-auto">
+                        <i class="fas fa-search h4 text-body"></i>
+                    </div>
+                    <div class="col">
+                        <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Buscar ...">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-lg btn-success" type="button">Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!collapsed else open" class="mt-3">
+        <div class="row justify-content-center">
+            <div class="col-3">
+                <div class="form-group">
+                    <label for="comensales">Comensales</label>
+                    <select class="form-control" id="comensales">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-group">
+                    <label for="dificultad">Dificultad</label>
+                    <select class="form-control" id="dificultad">
+                        <option>Muy Fácil</option>
+                        <option>Fácil</option>
+                        <option>Media</option>
+                        <option>Difícil</option>
+                        <option>Muy Difícil</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-3">
+                <label for="time">Tiempo Preparación</label>
+                <ngb-timepicker id="time" [(ngModel)]="time" [spinners]="false" [hourStep]="1" [minuteStep]="15"></ngb-timepicker>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="form-group text-center">
+                    <label for="update">Ultima Modificación</label>
+                    <br>
+                    <ngb-datepicker id="update" #dp [displayMonths]="2" [dayTemplate]="t" (select)="onDateSelection($event)"
+                                    outsideDays="hidden">
+                    </ngb-datepicker>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <button (click)="collapsed = true" class="btn btn-primary">
+                Menos Filtros
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #t let-date let-focused="focused">
+  <span class="custom-day" [class.focused]="focused" [class.range]="isRange(date)" [class.faded]="isHovered(date) || isInside(date)"
+        (mouseenter)="hoveredDate = date" (mouseleave)="hoveredDate = null">
+    {{ date.day }}
+  </span>
+</ng-template>
+
+<ng-template #open>
+    <div class="text-dark text-center">
+        <button (click)="collapsed = false" class="btn btn-primary">
+            Más Filtros
+        </button>
+    </div>
+</ng-template>
