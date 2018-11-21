@@ -1,70 +1,114 @@
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="card card-sm">
-                <div class="card-body row no-gutters align-items-center">
-                    <div class="col-auto">
-                        <i class="fas fa-search h4 text-body"></i>
-                    </div>
-                    <div class="col">
-                        <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Buscar ...">
-                    </div>
-                    <div class="col-auto">
-                        <button class="btn btn-lg btn-success" type="button">Buscar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div *ngIf="!collapsed else open" class="mt-3">
-        <div class="row justify-content-center">
-            <div class="col-3">
-                <div class="form-group">
-                    <label for="comensales">Comensales</label>
-                    <select class="form-control" id="comensales">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="form-group">
-                    <label for="dificultad">Dificultad</label>
-                    <select class="form-control" id="dificultad">
-                        <option>Muy Fácil</option>
-                        <option>Fácil</option>
-                        <option>Media</option>
-                        <option>Difícil</option>
-                        <option>Muy Difícil</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-3">
-                <label for="time">Tiempo Preparación</label>
-                <ngb-timepicker id="time" [(ngModel)]="time" [spinners]="false" [hourStep]="1" [minuteStep]="15"></ngb-timepicker>
-            </div>
-        </div>
-
-        <div class="row mt-3">
+    <div class="justify-content-center mb-5">
+        <div class="row">
             <div class="col-12">
-                <div class="form-group text-center">
-                    <label for="update">Ultima Modificación</label>
-                    <br>
-                    <ngb-datepicker id="update" #dp [displayMonths]="2" [dayTemplate]="t" (select)="onDateSelection($event)"
-                                    outsideDays="hidden">
-                    </ngb-datepicker>
+                <div class="card card-sm">
+                    <div class="card-body row no-gutters align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-search h4 text-body"></i>
+                        </div>
+                        <div class="col">
+                            <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Buscar ..."
+                                   [(ngModel)]="filter.keywords" (keydown.enter)="search()">
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-lg btn-success" type="button" (click)="search()">Buscar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center mt-3">
-            <button (click)="collapsed = true" class="btn btn-primary">
-                Menos Filtros
-            </button>
+        <div *ngIf="!collapsed else open" class="mt-3">
+            <div class="row justify-content-center">
+                <div class="col-3">
+                    <div class="form-group">
+                        <label for="comensales">Comensales</label>
+                        <select class="form-control" id="comensales" [(ngModel)]="filter.dinners">
+                            <option [value]="1">1</option>
+                            <option [value]="2">2</option>
+                            <option [value]="3">3</option>
+                            <option [value]="4">4</option>
+                            <option [value]="5">5</option>
+                            <option [value]="6">6</option>
+                            <option [value]="7">7</option>
+                            <option [value]="8">8</option>
+                            <option [value]="9">9</option>
+                            <option [value]="10">10</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <label for="dificultad">Dificultad</label>
+                        <select class="form-control" id="dificultad" [(ngModel)]="filter.difficulty">
+                            <option [value]="1">Muy Fácil</option>
+                            <option [value]="2">Fácil</option>
+                            <option [value]="3">Media</option>
+                            <option [value]="4">Difícil</option>
+                            <option [value]="5">Muy Difícil</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <label for="time">Tiempo Máximo</label>
+                    <ngb-timepicker id="time" [(ngModel)]="filter.max_time" [spinners]="false" [hourStep]="1"
+                                    [minuteStep]="15"></ngb-timepicker>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="form-group text-center">
+                        <label for="update">Ultima Modificación</label>
+                        <br>
+                        <ngb-datepicker id="update" #dp [displayMonths]="2" [dayTemplate]="t" [maxDate]="today"
+                                        (select)="onDateSelection($event)" outsideDays="hidden">
+                        </ngb-datepicker>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-3">
+                <button (click)="collapsed = true" class="btn btn-primary">
+                    Menos Filtros
+                </button>
+            </div>
         </div>
     </div>
+
+    <div *ngIf="found.total" class="row justify-content-center mb-3">
+        <ngb-pagination [collectionSize]="found.total" [(page)]="page" (pageChange)="search()"></ngb-pagination>
+    </div>
+
+    <div *ngFor="let el of found.hits">
+        <div class="card">
+            <div class="card-title p-3">
+                <div class="d-flex">
+                    <div class="text-primary text-uppercase"><a [href]="el._source.url" target="_blank">{{el._source.name}}</a></div>
+                    <span class="ml-auto mr-0"><b>Score:</b> {{el._score | number:'2.6-6'}}</span>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+            </div>
+
+            <div class="card-footer">
+                <div class="badge mx-1 p-2" [ngClass]="difficultyClass(el)">{{difficulty(el)}}:</div>
+                <div *ngFor="let cat of categories(el)" class="badge badge-dark mx-1 p-2">
+                    {{cat | titlecase}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="found.total" class="row justify-content-center mt-3">
+        <ngb-pagination [collectionSize]="found.total" [(page)]="page" (pageChange)="search()"></ngb-pagination>
+    </div>
+
+    <!--<div *ngFor="let el of found.hits">-->
+    <!--{{el._source | json}}-->
+    <!--</div>-->
+
 </div>
 
 
@@ -76,7 +120,7 @@
 </ng-template>
 
 <ng-template #open>
-    <div class="text-dark text-center">
+    <div class="text-dark text-center mt-3">
         <button (click)="collapsed = false" class="btn btn-primary">
             Más Filtros
         </button>
