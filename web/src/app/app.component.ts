@@ -81,8 +81,8 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.filter.keywords = 'tortilla';
-        this.search();
+        // this.filter.keywords = 'tortilla';
+        // this.search();
     }
 
     onDateSelection(date: NgbDate) {
