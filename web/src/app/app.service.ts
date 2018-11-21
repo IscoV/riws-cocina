@@ -45,7 +45,7 @@ export class AppService {
                 }
             }
         };
-        return this.http.post(environment.BASE_URL + `?size=4&from=${4 * page}`, body, {headers: {'Content-Type': 'application/json'}});
+        return this.http.post(environment.BASE_URL + `?size=10&from=${10 * page}`, body, {headers: {'Content-Type': 'application/json'}});
     }
 
 }
