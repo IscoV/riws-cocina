@@ -14,6 +14,10 @@ export class AppService {
         return time && time.hour * 60 + time.minute || 999;
     }
 
+    private page(page) {
+        return page ? (page - 1) * 10 : 0;
+    }
+
     public get(filter: { keywords?: string, dinners?: number, difficulty?: number, max_time?: any, last_update?: any }, page = 0) {
         const body = {
             query: {
@@ -45,7 +49,10 @@ export class AppService {
                 }
             }
         };
-        return this.http.post(environment.BASE_URL + `?size=10&from=${10 * page}`, body, {headers: {'Content-Type': 'application/json'}});
+        return this.http.post(
+            environment.BASE_URL + `?size=10&from=${this.page(page)}`,
+            body,
+            {headers: {'Content-Type': 'application/json'}});
     }
 
 }

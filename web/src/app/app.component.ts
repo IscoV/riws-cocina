@@ -3,6 +3,7 @@ import {NgbCalendar, NgbDate} from '@ng-bootstrap/ng-bootstrap';
 import {AppService} from './app.service';
 
 interface Item {
+    _id: string;
     _score: number;
     _source: {
         name: string,
@@ -33,14 +34,15 @@ export class AppComponent implements OnInit {
     toDate: NgbDate;
 
     collapsed = true;
-    page = 0;
+    page = 1;
 
     filter: { keywords?: string, dinners: number, difficulty: number, max_time?: any, last_update?: any } = {dinners: 1, difficulty: 5};
     found = {hits: [], total: 0};
 
+    trackById = (obj) => obj._id;
+
     categories(item: Item) {
-        item._source.categories.pop();
-        return item._source.categories;
+        return item._source.categories.slice(0, item._source.categories.length - 1);
     }
 
     difficulty(item: Item) {
@@ -81,8 +83,6 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // this.filter.keywords = 'tortilla';
-        // this.search();
     }
 
     onDateSelection(date: NgbDate) {
