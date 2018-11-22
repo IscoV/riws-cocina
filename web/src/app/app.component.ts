@@ -29,7 +29,6 @@ interface Item {
 })
 export class AppComponent implements OnInit {
     today: NgbDate;
-    hoveredDate: NgbDate;
     fromDate: NgbDate;
     toDate: NgbDate;
 
@@ -83,30 +82,6 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-    }
-
-    onDateSelection(date: NgbDate) {
-        if (!this.fromDate && !this.toDate) {
-            this.fromDate = date;
-        } else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
-            this.toDate = date;
-        } else {
-            this.toDate = null;
-            this.fromDate = date;
-        }
-        this.filter.last_update = {from: this.fromDate, to: this.toDate};
-    }
-
-    isHovered(date: NgbDate) {
-        return this.fromDate && !this.toDate && this.hoveredDate && date.after(this.fromDate) && date.before(this.hoveredDate);
-    }
-
-    isInside(date: NgbDate) {
-        return date.after(this.fromDate) && date.before(this.toDate);
-    }
-
-    isRange(date: NgbDate) {
-        return date.equals(this.fromDate) || date.equals(this.toDate) || this.isInside(date) || this.isHovered(date);
     }
 
     search() {
