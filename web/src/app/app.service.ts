@@ -22,17 +22,38 @@ export class AppService {
         const body = {
             query: {
                 bool: {
-                    must: {
+                    must: [{
                         match: {
-                            name: filter.keywords || ''
+                            name: {
+                                query: filter.keywords || '',
+                                fuzziness: 5
+                            },
                         }
-                    },
-                    should: {
+                    }],
+                    should: [{
                         multi_match: {
                             query: filter.keywords || '',
-                            fields: ['ingredients', 'description', 'categories', 'meal_type', 'steps']
+                            fields: ['ingredients^3', 'categories'],
+                            type: 'phrase',
+                            slop: 2,
                         }
-                    },
+                    }, {
+                        match_phrase_prefix: {
+                            description: {
+                                query: filter.keywords || '',
+                                slop: 2,
+                                max_expansions: 10
+                            }
+                        }
+                    }, {
+                        match_phrase_prefix: {
+                            steps: {
+                                query: filter.keywords || '',
+                                slop: 2,
+                                max_expansions: 5
+                            }
+                        }
+                    }],
                     filter: [
                         {
                             range: {
